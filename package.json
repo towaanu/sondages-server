@@ -1,0 +1,28 @@
+{
+  "name": "sondages",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.ts",
+  "scripts": {
+    "start": "babel-node src/main.ts --extensions .ts",
+    "build": "babel src --out-dir dist --extensions .ts",
+    "ts:check": "tsc",
+    "prettier:write": "prettier --write .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Antoine Muller",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/cli": "^7.12.16",
+    "@babel/core": "^7.12.16",
+    "@babel/node": "^7.12.16",
+    "@babel/preset-env": "^7.12.16",
+    "@babel/preset-typescript": "^7.12.16",
+    "@types/express": "^4.17.11",
+    "prettier": "^2.2.1",
+    "typescript": "^4.1.5"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
