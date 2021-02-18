@@ -1,6 +1,8 @@
 node_modules
 dist
 
+.env
+
 # Mac OSX
 # General
 .DS_Store

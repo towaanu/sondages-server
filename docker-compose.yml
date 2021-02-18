@@ -1,0 +1,25 @@
+services:
+    node_api:
+        image: node:alpine
+        depends_on: 
+            - postgresdb
+            - pgadmin
+        ports:
+            - "3030:3030"
+        volumes:
+            - ".:/sondages"
+
+    postgresdb:
+        image: postgres:alpine
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: secret
+            POSTGRES_DB: sondages
+
+    pgadmin:
+        image: dpage/pgadmin4
+        ports:
+            - "5050:80"
+        environment:
+            PGADMIN_DEFAULT_EMAIL: admin@localhost
+            PGADMIN_DEFAULT_PASSWORD: secret
