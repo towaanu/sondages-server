@@ -55,10 +55,21 @@ const QuestionsMutation = extendType({
           type: nonNull("String"),
           description: "Question's label",
         }),
+        predefinedAnswers: arg({
+          type: list("String"),
+          description: "Predefined answers to associate with answers",
+        }),
       },
-      resolve: (_parent, { label }, { prisma }) => {
+      resolve: (_parent, { label, predefinedAnswers }, { prisma }) => {
+        let newQuestion: any = { label };
+        if (predefinedAnswers) {
+          newQuestion.predefinedAnswers = {
+            create: predefinedAnswers.map((a) => ({ label: a })),
+          };
+        }
+
         return prisma.question.create({
-          data: { label },
+          data: newQuestion,
         });
       },
     });
