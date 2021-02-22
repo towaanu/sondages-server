@@ -21,5 +21,5 @@ services:
     ports:
       - "5050:8080"
     environment:
-        ADMINER_DESIGN: mvt
-        ADMINER_DEFAULT_SERVER: postgresdb
+      ADMINER_DESIGN: mvt
+      ADMINER_DEFAULT_SERVER: postgresdb

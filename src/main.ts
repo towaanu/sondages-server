@@ -1,7 +1,7 @@
 import express from "express";
 import { graphqlHTTP } from "express-graphql";
 import { PrismaClient } from "@prisma/client";
-import schema from "./graphql/schema";
+import { schema } from "./graphql";
 import { genContext } from "./graphql/context";
 
 const server = express();
@@ -16,19 +16,11 @@ server.use(
   graphqlHTTP((_req, _res, _graphQLParams) => {
     return {
       schema: schema,
-      graphiql: true,
       context: genContext(prismaClient),
+      graphiql: process.env.NODE_ENV === "development",
     };
   })
 );
-
-// server.use(
-//   "/graphql",
-//   graphqlHTTP({
-//     schema: schema,
-//     graphiql: true,
-//   })
-// );
 
 server.listen(port, () =>
   console.log(`Server started at http://localhost:${port}`)

@@ -1,4 +1,4 @@
-import * as allTypes from "./models";
+import * as allTypes from "./schema";
 import path from "path";
 import { makeSchema } from "nexus";
 
@@ -22,4 +22,4 @@ const schema = makeSchema({
   },
 });
 
-export default schema;
+export { schema };
