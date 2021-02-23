@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import { graphqlHTTP } from "express-graphql";
 import { PrismaClient } from "@prisma/client";
 import { schema } from "./graphql";
@@ -8,6 +9,10 @@ const server = express();
 const port = 3030;
 
 const prismaClient = new PrismaClient();
+
+if(process.env.NODE_ENV === "development") {
+    server.use(cors());
+}
 
 server.get("/", (_req, res) => res.send("Hello world"));
 
