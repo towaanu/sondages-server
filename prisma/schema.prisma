@@ -32,3 +32,17 @@ model PredefinedAnswer {
     @@unique([questionId, label])
     @@map(name: "predefined_answers")
 }
+
+model Vote {
+    id Int @default(autoincrement()) @id
+    questionId String @map("question_id") @db.Uuid
+    predefinedAnswerId Int @map("predefined_answer_id")
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    question Question @relation(fields: [questionId], references: [id])
+    predefinedAnswer PredefinedAnswer @relation(fields: [predefinedAnswerId], references: [id])
+
+    @@map(name: "votes")
+}
