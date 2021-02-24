@@ -1,6 +1,7 @@
-import { objectType, nonNull, extendType, arg } from "nexus";
+import { objectType, nonNull, extendType, arg, list } from "nexus";
 import { DateTimeScalar } from "./scalars";
 import { Question } from "./questions";
+import { Vote } from "./votes";
 
 const PredefinedAnswer = objectType({
   name: "PredefinedAnswer",
@@ -25,6 +26,29 @@ const PredefinedAnswer = objectType({
               throw new Error("Question not found for answer");
             }
           }),
+    });
+
+    t.field("votes", {
+      type: list(Vote),
+      resolve: ({ id: predefinedAnswerId }, _args, { prisma }) =>
+        prisma.vote
+          .findMany({
+            where: { predefinedAnswerId: parseInt(predefinedAnswerId) },
+          })
+          .then((votes) =>
+            votes.map((v) => ({
+              ...v,
+              id: v.id.toString(),
+            }))
+          ),
+    });
+
+    t.field("votesCount", {
+      type: nonNull("Int"),
+      resolve: ({ id: predefinedAnswerId }, _args, { prisma }) =>
+        prisma.vote.count({
+          where: { predefinedAnswerId: parseInt(predefinedAnswerId) },
+        }),
     });
   },
 });

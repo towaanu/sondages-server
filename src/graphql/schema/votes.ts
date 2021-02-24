@@ -1,4 +1,4 @@
-import { objectType, extendType, nonNull, arg} from "nexus";
+import { objectType, extendType, nonNull, arg } from "nexus";
 import { DateTimeScalar } from "./scalars";
 import { PredefinedAnswer } from "./predefined_answers";
 
@@ -21,9 +21,9 @@ const Vote = objectType({
           .then((res) => {
             if (res?.predefinedAnswer) {
               return {
-		  ...res.predefinedAnswer,
-		  id: res.predefinedAnswer.id.toString()
-	      };
+                ...res.predefinedAnswer,
+                id: res.predefinedAnswer.id.toString(),
+              };
             } else {
               throw new Error("Predefined answer not found for vote");
             }
@@ -44,17 +44,18 @@ const VotesMutation = extendType({
           description: "Answer's id",
         }),
       },
-      resolve: (_parent, { predefinedAnswerId  }, { prisma }) => {
-        return prisma.vote.create({
-          data: { predefinedAnswerId: parseInt(predefinedAnswerId) },
-        })
-	.then(newVote => ({
-	    ...newVote,
-	    id: newVote.id.toString(),
-	}));
+      resolve: (_parent, { predefinedAnswerId }, { prisma }) => {
+        return prisma.vote
+          .create({
+            data: { predefinedAnswerId: parseInt(predefinedAnswerId) },
+          })
+          .then((newVote) => ({
+            ...newVote,
+            id: newVote.id.toString(),
+          }));
       },
     });
   },
 });
 
-export { Vote, VotesMutation }
+export { Vote, VotesMutation };

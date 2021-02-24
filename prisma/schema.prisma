@@ -29,6 +29,8 @@ model PredefinedAnswer {
 
     question Question @relation(fields: [questionId], references: [id])
 
+    votes Vote[]
+
     @@unique([questionId, label])
     @@map(name: "predefined_answers")
 }

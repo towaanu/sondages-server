@@ -10,8 +10,8 @@ const port = 3030;
 
 const prismaClient = new PrismaClient();
 
-if(process.env.NODE_ENV === "development") {
-    server.use(cors());
+if (process.env.NODE_ENV === "development") {
+  server.use(cors());
 }
 
 server.get("/", (_req, res) => res.send("Hello world"));
