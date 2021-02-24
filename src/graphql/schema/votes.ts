@@ -1,6 +1,7 @@
-import { objectType, extendType, nonNull, arg } from "nexus";
+import { objectType, extendType, nonNull, arg, subscriptionField } from "nexus";
 import { DateTimeScalar } from "./scalars";
 import { PredefinedAnswer } from "./predefined_answers";
+import pubsub, { Topic } from "../pubsub";
 
 const Vote = objectType({
   name: "Vote",
@@ -49,13 +50,24 @@ const VotesMutation = extendType({
           .create({
             data: { predefinedAnswerId: parseInt(predefinedAnswerId) },
           })
-          .then((newVote) => ({
-            ...newVote,
-            id: newVote.id.toString(),
-          }));
+          .then((newVote) => {
+            pubsub.publish(Topic.NEW_VOTE, newVote);
+            return {
+              ...newVote,
+              id: newVote.id.toString(),
+            };
+          });
       },
     });
   },
 });
 
-export { Vote, VotesMutation };
+const VotesSubscription = subscriptionField("newVote", {
+  type: nonNull("ID"),
+  subscribe: () => pubsub.asyncIterator(Topic.NEW_VOTE),
+  resolve(newVote: any) {
+    return newVote.predefinedAnswerId;
+  },
+});
+
+export { Vote, VotesMutation, VotesSubscription };

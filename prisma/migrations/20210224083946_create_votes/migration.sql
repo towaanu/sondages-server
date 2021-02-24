@@ -27,4 +27,4 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER "after_vote" 
     AFTER INSERT ON "votes"
     FOR EACH ROW
-    EXECUTE PROCEDURE notify_new_vote()
+    EXECUTE PROCEDURE notify_new_vote();
