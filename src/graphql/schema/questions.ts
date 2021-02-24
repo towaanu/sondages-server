@@ -7,6 +7,7 @@ const Question = objectType({
   definition(t) {
     t.nonNull.id("id");
     t.nonNull.string("label");
+
     t.field("createdAt", { type: nonNull(DateTimeScalar) });
     t.field("updatedAt", { type: nonNull(DateTimeScalar) });
 
