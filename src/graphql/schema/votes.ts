@@ -1,9 +1,9 @@
 import { objectType, extendType, nonNull, arg, subscriptionField } from "nexus";
 import { DateTimeScalar } from "./scalars";
 import { PredefinedAnswer } from "./predefined_answers";
-import {withFilter} from 'graphql-subscriptions';
+import { withFilter } from "graphql-subscriptions";
 import pubsub, { Topic } from "../pubsub";
-import { Prisma } from '@prisma/client'
+import { Prisma } from "@prisma/client";
 
 const Vote = objectType({
   name: "Vote",
@@ -51,7 +51,7 @@ const VotesMutation = extendType({
         return prisma.vote
           .create({
             data: { predefinedAnswerId: parseInt(predefinedAnswerId) },
-	    include: { predefinedAnswer: true }
+            include: { predefinedAnswer: true },
           })
           .then((newVote) => {
             pubsub.publish(Topic.NEW_VOTE, newVote);
@@ -65,18 +65,23 @@ const VotesMutation = extendType({
   },
 });
 
-type NewVotePayload = Prisma.VoteGetPayload<{select: { predefinedAnswer: true}}>;
+type NewVotePayload = Prisma.VoteGetPayload<{
+  select: { predefinedAnswer: true };
+}>;
 const VotesSubscription = subscriptionField("newVote", {
   type: nonNull("ID"),
   args: {
-      questionId: arg({
-	  type: nonNull("ID"),
-	  description: "Question to watch"
-      })
+    questionId: arg({
+      type: nonNull("ID"),
+      description: "Question to watch",
+    }),
   },
-  subscribe: withFilter(() => pubsub.asyncIterator(Topic.NEW_VOTE), (payload: NewVotePayload, variables: {questionId: string}) => {
-      return payload.predefinedAnswer.questionId === variables.questionId
-  }),
+  subscribe: withFilter(
+    () => pubsub.asyncIterator(Topic.NEW_VOTE),
+    (payload: NewVotePayload, variables: { questionId: string }) => {
+      return payload.predefinedAnswer.questionId === variables.questionId;
+    }
+  ),
   resolve(newVote: any) {
     return newVote.predefinedAnswerId;
   },
