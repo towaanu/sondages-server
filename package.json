@@ -5,6 +5,7 @@
   "main": "main.ts",
   "scripts": {
     "start": "babel-node src/main.ts --extensions .ts",
+    "start:prod": "NODE_ENV=production node dist/main.js",
     "dev": "NODE_ENV=development babel-node src/main.ts --extensions .ts",
     "build": "babel src --out-dir dist --extensions .ts",
     "ts:check": "tsc",

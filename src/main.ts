@@ -10,12 +10,19 @@ import { execute, subscribe } from "graphql";
 import expressPlayground from "graphql-playground-middleware-express";
 
 const server = express();
-const port = 3030;
 
 const prismaClient = new PrismaClient();
 
 if (process.env.NODE_ENV === "development") {
   server.use(cors());
+}
+
+if (process.env.NODE_ENV === "production") {
+  server.use(
+    cors({
+      origin: process.env.CORS_ORIGIN,
+    })
+  );
 }
 
 server.get("/", (_req, res) => res.send("Hello world"));
@@ -36,15 +43,15 @@ if (process.env.NODE_ENV === "development") {
     "/playground",
     expressPlayground({
       endpoint: "/graphql",
-      subscriptionEndpoint: `ws://localhost:${port}/subscriptions`,
+      subscriptionEndpoint: `ws://localhost:${process.env.SERVER_PORT}/subscriptions`,
     })
   );
 }
 
 const ws = createServer(server);
 
-ws.listen(port, () => {
-  console.log(`Server started at http://localhost:${port}`);
+ws.listen(process.env.SERVER_PORT, () => {
+  console.log(`Server started at http://localhost:${process.env.SERVER_PORT}`);
   // Set up the WebSocket for handling GraphQL subscriptions.
   new SubscriptionServer(
     {
