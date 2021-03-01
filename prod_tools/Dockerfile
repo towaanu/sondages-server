@@ -19,7 +19,7 @@ FROM node:alpine
 
 ENV NODE_ENV=production
 
-COPY --from=build /sondages/dist /app/
+COPY --from=build /sondages/dist /app/dist
 COPY --from=build /sondages/package.json /app/
 
 COPY prisma /app/prisma

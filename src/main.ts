@@ -18,11 +18,9 @@ if (process.env.NODE_ENV === "development") {
 }
 
 if (process.env.NODE_ENV === "production") {
-  server.use(
-    cors({
-      origin: process.env.CORS_ORIGIN,
-    })
-  );
+  server.use(cors({
+      origin: process.env.CORS_ORIGIN
+  }));
 }
 
 server.get("/", (_req, res) => res.send("Hello world"));
