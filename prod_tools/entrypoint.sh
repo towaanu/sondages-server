@@ -9,11 +9,6 @@ do
   sleep 2
 done
 
-# bin="/app/bin/kaimono"
-# eval "$bin eval \"Kaimono.Release.migrate\""
-# start the elixir application
-# exec "$bin" "start"
-
 # run migrations
 npm run prisma:migrate
 
