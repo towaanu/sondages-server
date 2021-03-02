@@ -24,7 +24,7 @@ Once started, you can access a graphql playground here : http://localhost:3030/p
 # Production build
 Since we are using typescript and babel, we need to create a production build before using the app in production. \
 There is a Dockerfile (`prod_tools/Dockerfile`) creating a ready to use container to start the nodejs app. \
-To create an image using the Dockerfile, you need to be at the root of the project and running : \
+To create an image using the Dockerfile, you need to be at **the root of the project** and run : \
 `docker build -t sondages:prod -f ./prod_tools/Dockerfile .`
 
 There is also a `docker-compose.prod.yml` providing a template for deploying the app using docker-compose.
