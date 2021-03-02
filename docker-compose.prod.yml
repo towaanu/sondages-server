@@ -1,8 +1,6 @@
 services:
   node_api:
-    build:
-        context: .
-        dockerfile: ./prod_tools/Dockerfile
+    image: sondages:prod
     depends_on:
       - postgresdb
     ports:
