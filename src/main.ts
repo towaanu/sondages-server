@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
 import { graphqlHTTP } from "express-graphql";
-import { PrismaClient } from "@prisma/client";
 import { createServer } from "http";
 import { SubscriptionServer } from "subscriptions-transport-ws";
 import { schema } from "./graphql";
@@ -12,8 +11,6 @@ import {knexPg} from './db'
 
 
 const server = express();
-
-const prismaClient = new PrismaClient();
 
 if (process.env.NODE_ENV === "development") {
   server.use(cors());
@@ -32,7 +29,7 @@ server.use(
   graphqlHTTP((_req, _res, _graphQLParams) => {
     return {
       schema: schema,
-      context: genContext(prismaClient, knexPg),
+      context: genContext(knexPg),
       graphiql: false,
     };
   })
