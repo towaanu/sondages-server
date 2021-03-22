@@ -10,6 +10,7 @@ import { execute, subscribe } from "graphql";
 import expressPlayground from "graphql-playground-middleware-express";
 import {knexPg} from './db'
 
+
 const server = express();
 
 const prismaClient = new PrismaClient();

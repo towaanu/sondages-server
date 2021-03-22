@@ -2,7 +2,7 @@ import * as allTypes from "./schema";
 import path from "path";
 import { makeSchema } from "nexus";
 
-let schema = null;
+let schema:any = null;
 
 if (process.env.NODE_ENV === "development") {
   schema = makeSchema({
