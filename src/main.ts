@@ -7,8 +7,7 @@ import { schema } from "./graphql";
 import { genContext } from "./graphql/context";
 import { execute, subscribe } from "graphql";
 import expressPlayground from "graphql-playground-middleware-express";
-import {knexPg} from './db'
-
+import { knexPg } from "./db";
 
 const server = express();
 
@@ -17,9 +16,11 @@ if (process.env.NODE_ENV === "development") {
 }
 
 if (process.env.NODE_ENV === "production") {
-  server.use(cors({
-      origin: process.env.CORS_ORIGIN
-  }));
+  server.use(
+    cors({
+      origin: process.env.CORS_ORIGIN,
+    })
+  );
 }
 
 server.get("/", (_req, res) => res.send("Hello world"));

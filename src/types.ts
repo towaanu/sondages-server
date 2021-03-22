@@ -1,24 +1,24 @@
 export interface DbQuestion {
-    id: string
-    label: string
+  id: string;
+  label: string;
 
-    createdAt: Date
-    updatedAt: Date
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface DbPredefinedAnswer {
-    id: number
-    label: string
-    questionId: string
+  id: number;
+  label: string;
+  questionId: string;
 
-    createdAt: Date
-    updatedAt: Date
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface DbVote {
-    id: number
-    predefinedAnswerId: number
+  id: number;
+  predefinedAnswerId: number;
 
-    createdAt: Date
-    updatedAt: Date
+  createdAt: Date;
+  updatedAt: Date;
 }

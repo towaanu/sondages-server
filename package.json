@@ -9,6 +9,7 @@
     "dev": "NODE_ENV=development babel-node src/main.ts --extensions .ts",
     "build": "babel src --out-dir dist --extensions .ts",
     "ts:check": "tsc",
+    "prettier:write": "prettier --write .",
     "knex:migrate": "knex migrate:latest",
     "knex:rollback": "knex migrate:rollback",
     "knex:rollback-all": "knex migrate:rollback --all",

@@ -1,26 +1,25 @@
 import { Knex } from "knex";
 
-
 const predefinedAnswersTableName = "predefined_answers";
 
 export async function up(knex: Knex): Promise<void> {
-    await knex.schema
-	.createTable(predefinedAnswersTableName, table => {
-	    table.increments('id');
-	    table.string("label", 255).notNullable();
+  await knex.schema.createTable(predefinedAnswersTableName, (table) => {
+    table.increments("id");
+    table.string("label", 255).notNullable();
 
-	    table.uuid("question_id")
-		.references("id")
-		.inTable("questions")
-		.notNullable();
+    table
+      .uuid("question_id")
+      .references("id")
+      .inTable("questions")
+      .notNullable();
 
-	    table.timestamp('created_at', {useTz: true}).defaultTo(knex.fn.now());
-	    table.timestamp('updated_at', {useTz: true}).defaultTo(knex.fn.now());
+    table.timestamp("created_at", { useTz: true }).defaultTo(knex.fn.now());
+    table.timestamp("updated_at", { useTz: true }).defaultTo(knex.fn.now());
 
-	    table.unique(["question_id", "label"]);
-	});
+    table.unique(["question_id", "label"]);
+  });
 
-    await knex.raw(`
+  await knex.raw(`
 	CREATE TRIGGER update_timestamp
 	BEFORE UPDATE
 	ON ${predefinedAnswersTableName}
@@ -29,8 +28,6 @@ export async function up(knex: Knex): Promise<void> {
   `);
 }
 
-
 export async function down(knex: Knex): Promise<void> {
-    return knex.schema.dropTable(predefinedAnswersTableName)
+  return knex.schema.dropTable(predefinedAnswersTableName);
 }
-

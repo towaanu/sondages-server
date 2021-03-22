@@ -13,31 +13,40 @@ const PredefinedAnswer = objectType({
     t.field("updatedAt", { type: nonNull(DateTimeScalar) });
     t.field("question", {
       type: nonNull(Question),
-      resolve: ({ id: predefinedAnswerId }, _args, { knex }) => knex("predefinedAnswers")
-	      .select("questions.id", "questions.label", "questions.createdAt", "questions.updatedAt")
-	      .join("questions", "questions.id", "predefinedAnswers.questionId")
-	      .where("predefinedAnswers.id", predefinedAnswerId)
-	      .first(),
+      resolve: ({ id: predefinedAnswerId }, _args, { knex }) =>
+        knex("predefinedAnswers")
+          .select(
+            "questions.id",
+            "questions.label",
+            "questions.createdAt",
+            "questions.updatedAt"
+          )
+          .join("questions", "questions.id", "predefinedAnswers.questionId")
+          .where("predefinedAnswers.id", predefinedAnswerId)
+          .first(),
     });
 
     t.field("votes", {
       type: list(Vote),
-      resolve: ({ id: predefinedAnswerId }, _args, { knex }) => knex("votes")
-	    .where("predefinedAnswerId", predefinedAnswerId)
-	    .then((votes) =>
-		  votes.map((v) => ({
-		      ...v,
-		      id: v.id.toString(),
-		  })))
+      resolve: ({ id: predefinedAnswerId }, _args, { knex }) =>
+        knex("votes")
+          .where("predefinedAnswerId", predefinedAnswerId)
+          .then((votes) =>
+            votes.map((v) => ({
+              ...v,
+              id: v.id.toString(),
+            }))
+          ),
     });
 
     t.field("votesCount", {
       type: nonNull("Int"),
-      resolve: ({ id: predefinedAnswerId }, _args, { knex }) => knex("votes")
-	  .count("id", {as: "votesCount"})
-	  .where("predefinedAnswerId", predefinedAnswerId)
-	  .first()
-	  .then(res => res ? res["votesCount"] : 0),
+      resolve: ({ id: predefinedAnswerId }, _args, { knex }) =>
+        knex("votes")
+          .count("id", { as: "votesCount" })
+          .where("predefinedAnswerId", predefinedAnswerId)
+          .first()
+          .then((res) => (res ? res["votesCount"] : 0)),
     });
   },
 });
@@ -53,18 +62,20 @@ const PredefinedAnswersMutation = extendType({
         label: arg({ type: nonNull("String"), description: "Answer label" }),
       },
       resolve: (_parent, { label, questionId }, { knex }) =>
-	knex("predefinedAnswers")
-	    .insert({label, questionId})
-	    .returning("id")
-	    .then(id => knex("predefinedAnswers").where("id", id).first())
-	    .then(pa => {
-		if(!pa) { throw new Error("Unable to fetch new created answer")}
-		return pa
-	    })
-	    .then(pa => ({
-		...pa,
-		id: pa.id.toString()
-	    }))
+        knex("predefinedAnswers")
+          .insert({ label, questionId })
+          .returning("id")
+          .then((id) => knex("predefinedAnswers").where("id", id).first())
+          .then((pa) => {
+            if (!pa) {
+              throw new Error("Unable to fetch new created answer");
+            }
+            return pa;
+          })
+          .then((pa) => ({
+            ...pa,
+            id: pa.id.toString(),
+          })),
     });
   },
 });

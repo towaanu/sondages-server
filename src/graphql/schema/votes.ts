@@ -15,19 +15,21 @@ const Vote = objectType({
     t.field("predefinedAnswer", {
       type: nonNull(PredefinedAnswer),
       resolve: ({ id: voteId }, _args, { knex }) => {
-      return knex("predefinedAnswers")
-	.select()
-	.join("votes", "votes.predefinedAnswerId", "predefinedAnswers.id")
-	.where("votes.id", voteId)
-	.first()
-	.then(pa => {
-	    if(!pa) { throw new Error("No new predefined answer") }
-	    return {
-		...pa,
-		id: pa.id.toString()
-	    }
-	})
-      }
+        return knex("predefinedAnswers")
+          .select()
+          .join("votes", "votes.predefinedAnswerId", "predefinedAnswers.id")
+          .where("votes.id", voteId)
+          .first()
+          .then((pa) => {
+            if (!pa) {
+              throw new Error("No new predefined answer");
+            }
+            return {
+              ...pa,
+              id: pa.id.toString(),
+            };
+          });
+      },
     });
   },
 });
@@ -45,25 +47,36 @@ const VotesMutation = extendType({
         }),
       },
       resolve: (_parent, { predefinedAnswerId }, { knex }) => {
-	  return knex("votes")
-	    .insert({predefinedAnswerId: parseInt(predefinedAnswerId)})
-	    .returning("id")
-	    .then(([id]) => knex("votes")
-		  .select("votes.id", "votes.predefinedAnswerId", "votes.createdAt", "votes.updatedAt", "predefinedAnswers.questionId")
-		  .where("votes.id", id)
-		  .join("predefinedAnswers", "predefinedAnswers.id", "votes.predefinedAnswerId")
-		  .first()
-		 )
-	    .then(newVote => {
-		pubsub.publish(Topic.NEW_VOTE, newVote);
-		return newVote
-	    })
+        return knex("votes")
+          .insert({ predefinedAnswerId: parseInt(predefinedAnswerId) })
+          .returning("id")
+          .then(([id]) =>
+            knex("votes")
+              .select(
+                "votes.id",
+                "votes.predefinedAnswerId",
+                "votes.createdAt",
+                "votes.updatedAt",
+                "predefinedAnswers.questionId"
+              )
+              .where("votes.id", id)
+              .join(
+                "predefinedAnswers",
+                "predefinedAnswers.id",
+                "votes.predefinedAnswerId"
+              )
+              .first()
+          )
+          .then((newVote) => {
+            pubsub.publish(Topic.NEW_VOTE, newVote);
+            return newVote;
+          });
       },
     });
   },
 });
 
-type NewVotePayload = { predfinedAnswerId: number, questionId: string }
+type NewVotePayload = { predfinedAnswerId: number; questionId: string };
 
 const VotesSubscription = subscriptionField("newVote", {
   type: nonNull("ID"),
