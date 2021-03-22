@@ -8,24 +8,24 @@ services:
     volumes:
       - ".:/sondages"
     environment:
-        NODE_ENV: production
-        SERVER_PORT: 80
-        CORS_ORIGIN: 
-        PG_DATABASE_URL: 
-        DATABASE_HOST: 
-        DATABASE_USER: 
-        PGPASSWORD: 
+      NODE_ENV: production
+      SERVER_PORT: 80
+      CORS_ORIGIN:
+      PG_DATABASE_URL:
+      DATABASE_HOST:
+      DATABASE_USER:
+      PGPASSWORD:
 
   postgresdb:
     image: postgres:alpine
     volumes:
-        - "./dbdata:/var/lib/postgresql/data"
+      - "./dbdata:/var/lib/postgresql/data"
     logging:
-        driver: "json-file"
-        options:
-            max-size: "200k"
-            max-file: "5"
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "5"
     environment:
-      POSTGRES_USER: 
-      POSTGRES_PASSWORD: 
-      POSTGRES_DB: 
+      POSTGRES_USER:
+      POSTGRES_PASSWORD:
+      POSTGRES_DB:

@@ -1,6 +1,7 @@
 import { objectType, extendType, list, nonNull, arg, idArg } from "nexus";
 import { DateTimeScalar } from "./scalars";
 import { PredefinedAnswer } from "./predefined_answers";
+
 const Question = objectType({
   name: "Question",
   description: "Question related to a poll",
@@ -13,11 +14,14 @@ const Question = objectType({
 
     t.field("predefinedAnswers", {
       type: nonNull(list(PredefinedAnswer)),
-      resolve: ({ id: questionId }, _args, { prisma }) =>
-        prisma.predefinedAnswer
-          .findMany({ where: { questionId } })
+      resolve: ({ id: questionId }, _args, { knex }) =>
+        knex("predefinedAnswers")
+          .where("questionId", questionId)
           .then((answers) =>
-            answers.map((a) => ({ ...a, id: a.id.toString() }))
+            answers.map((a) => ({
+              ...a,
+              id: a.id.toString(),
+            }))
           ),
     });
   },
@@ -29,7 +33,7 @@ const QuestionsQuery = extendType({
     t.field("questions", {
       type: nonNull(list(Question)),
       description: "List all questions",
-      resolve: (_parent, _args, { prisma }) => prisma.question.findMany(),
+      resolve: (_parent, _args, { knex }) => knex("questions").select(),
     });
     t.field("question", {
       type: Question,
@@ -37,10 +41,11 @@ const QuestionsQuery = extendType({
       args: {
         id: nonNull(idArg()),
       },
-      resolve: (_parent, { id }, { prisma }) =>
-        prisma.question.findUnique({
-          where: { id },
-        }),
+      resolve: (_parent, { id }, { knex }) =>
+        knex("questions")
+          .where("id", id)
+          .first()
+          .then((q) => q ?? null),
     });
   },
 });
@@ -61,17 +66,36 @@ const QuestionsMutation = extendType({
           description: "Predefined answers to associate with answers",
         }),
       },
-      resolve: (_parent, { label, predefinedAnswers }, { prisma }) => {
+      resolve: (_parent, { label, predefinedAnswers }, { knex }) => {
         let newQuestion: any = { label };
-        if (predefinedAnswers) {
-          newQuestion.predefinedAnswers = {
-            create: predefinedAnswers.map((a) => ({ label: a })),
-          };
-        }
 
-        return prisma.question.create({
-          data: newQuestion,
-        });
+        let answers = predefinedAnswers ?? [];
+
+        return knex
+          .transaction((trx) =>
+            trx()
+              .insert(newQuestion, "id")
+              .into("questions")
+              .then((newQuestionIds: Array<string>) => {
+                const questionId = newQuestionIds[0];
+                const newAnswers = answers.map((label) => ({
+                  label,
+                  questionId,
+                }));
+                return trx("predefined_answers")
+                  .insert(newAnswers)
+                  .then(() => questionId);
+              })
+          )
+          .then((questionId) =>
+            knex("questions").where("id", questionId).first()
+          )
+          .then((question) => {
+            if (!question) {
+              throw new Error("Unable to fetch new questions");
+            }
+            return question;
+          });
       },
     });
   },
