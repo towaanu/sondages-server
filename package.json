@@ -8,6 +8,7 @@
     "start:prod": "NODE_ENV=production node dist/main.js",
     "dev": "NODE_ENV=development babel-node src/main.ts --extensions .ts",
     "build": "babel src --out-dir dist --extensions .ts",
+    "build:migrations": "babel migrations --out-dir dist_migrations --extensions .ts",
     "ts:check": "tsc",
     "prettier:write": "prettier --write .",
     "knex:migrate": "knex migrate:latest",

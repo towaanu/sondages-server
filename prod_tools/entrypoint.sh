@@ -10,7 +10,7 @@ do
 done
 
 # run migrations
-npm run prisma:migrate
+npm run knex:migrate
 
 # run the app
 npm run start:prod
