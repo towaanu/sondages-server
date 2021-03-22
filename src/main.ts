@@ -8,6 +8,7 @@ import { schema } from "./graphql";
 import { genContext } from "./graphql/context";
 import { execute, subscribe } from "graphql";
 import expressPlayground from "graphql-playground-middleware-express";
+import {knexPg} from './db'
 
 const server = express();
 
@@ -30,7 +31,7 @@ server.use(
   graphqlHTTP((_req, _res, _graphQLParams) => {
     return {
       schema: schema,
-      context: genContext(prismaClient),
+      context: genContext(prismaClient, knexPg),
       graphiql: false,
     };
   })

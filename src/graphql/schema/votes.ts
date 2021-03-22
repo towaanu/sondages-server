@@ -3,7 +3,6 @@ import { DateTimeScalar } from "./scalars";
 import { PredefinedAnswer } from "./predefined_answers";
 import { withFilter } from "graphql-subscriptions";
 import pubsub, { Topic } from "../pubsub";
-import { Prisma } from "@prisma/client";
 
 const Vote = objectType({
   name: "Vote",
@@ -15,22 +14,20 @@ const Vote = objectType({
 
     t.field("predefinedAnswer", {
       type: nonNull(PredefinedAnswer),
-      resolve: ({ id: voteId }, _args, { prisma }) =>
-        prisma.vote
-          .findUnique({
-            where: { id: parseInt(voteId) },
-            select: { predefinedAnswer: true },
-          })
-          .then((res) => {
-            if (res?.predefinedAnswer) {
-              return {
-                ...res.predefinedAnswer,
-                id: res.predefinedAnswer.id.toString(),
-              };
-            } else {
-              throw new Error("Predefined answer not found for vote");
-            }
-          }),
+      resolve: ({ id: voteId }, _args, { knex }) => {
+      return knex("predefinedAnswers")
+	.select()
+	.join("votes", "votes.predefinedAnswerId", "predefinedAnswers.id")
+	.where("votes.id", voteId)
+	.first()
+	.then(pa => {
+	    if(!pa) { throw new Error("No new predefined answer") }
+	    return {
+		...pa,
+		id: pa.id.toString()
+	    }
+	})
+      }
     });
   },
 });
@@ -47,27 +44,27 @@ const VotesMutation = extendType({
           description: "Answer's id",
         }),
       },
-      resolve: (_parent, { predefinedAnswerId }, { prisma }) => {
-        return prisma.vote
-          .create({
-            data: { predefinedAnswerId: parseInt(predefinedAnswerId) },
-            include: { predefinedAnswer: true },
-          })
-          .then((newVote) => {
-            pubsub.publish(Topic.NEW_VOTE, newVote);
-            return {
-              ...newVote,
-              id: newVote.id.toString(),
-            };
-          });
+      resolve: (_parent, { predefinedAnswerId }, { knex }) => {
+	  return knex("votes")
+	    .insert({predefinedAnswerId: parseInt(predefinedAnswerId)})
+	    .returning("id")
+	    .then(([id]) => knex("votes")
+		  .select("votes.id", "votes.predefinedAnswerId", "votes.createdAt", "votes.updatedAt", "predefinedAnswers.questionId")
+		  .where("votes.id", id)
+		  .join("predefinedAnswers", "predefinedAnswers.id", "votes.predefinedAnswerId")
+		  .first()
+		 )
+	    .then(newVote => {
+		pubsub.publish(Topic.NEW_VOTE, newVote);
+		return newVote
+	    })
       },
     });
   },
 });
 
-type NewVotePayload = Prisma.VoteGetPayload<{
-  select: { predefinedAnswer: true };
-}>;
+type NewVotePayload = { predfinedAnswerId: number, questionId: string }
+
 const VotesSubscription = subscriptionField("newVote", {
   type: nonNull("ID"),
   args: {
@@ -79,7 +76,7 @@ const VotesSubscription = subscriptionField("newVote", {
   subscribe: withFilter(
     () => pubsub.asyncIterator(Topic.NEW_VOTE),
     (payload: NewVotePayload, variables: { questionId: string }) => {
-      return payload.predefinedAnswer.questionId === variables.questionId;
+      return payload.questionId === variables.questionId;
     }
   ),
   resolve(newVote: any) {

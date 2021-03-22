@@ -5,7 +5,7 @@ const Query = objectType({
   definition(t) {
     t.string("apiVersion", {
       resolve(_parent, _args, _context) {
-        return "0.1";
+        return "0.2";
       },
     });
   },

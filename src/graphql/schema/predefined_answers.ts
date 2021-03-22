@@ -13,42 +13,31 @@ const PredefinedAnswer = objectType({
     t.field("updatedAt", { type: nonNull(DateTimeScalar) });
     t.field("question", {
       type: nonNull(Question),
-      resolve: ({ id: predefinedAnswerId }, _args, { prisma }) =>
-        prisma.predefinedAnswer
-          .findUnique({
-            where: { id: parseInt(predefinedAnswerId) },
-            select: { question: true },
-          })
-          .then((res) => {
-            if (res?.question) {
-              return res.question;
-            } else {
-              throw new Error("Question not found for answer");
-            }
-          }),
+      resolve: ({ id: predefinedAnswerId }, _args, { knex }) => knex("predefinedAnswers")
+	      .select("questions.id", "questions.label", "questions.createdAt", "questions.updatedAt")
+	      .join("questions", "questions.id", "predefinedAnswers.questionId")
+	      .where("predefinedAnswers.id", predefinedAnswerId)
+	      .first(),
     });
 
     t.field("votes", {
       type: list(Vote),
-      resolve: ({ id: predefinedAnswerId }, _args, { prisma }) =>
-        prisma.vote
-          .findMany({
-            where: { predefinedAnswerId: parseInt(predefinedAnswerId) },
-          })
-          .then((votes) =>
-            votes.map((v) => ({
-              ...v,
-              id: v.id.toString(),
-            }))
-          ),
+      resolve: ({ id: predefinedAnswerId }, _args, { knex }) => knex("votes")
+	    .where("predefinedAnswerId", predefinedAnswerId)
+	    .then((votes) =>
+		  votes.map((v) => ({
+		      ...v,
+		      id: v.id.toString(),
+		  })))
     });
 
     t.field("votesCount", {
       type: nonNull("Int"),
-      resolve: ({ id: predefinedAnswerId }, _args, { prisma }) =>
-        prisma.vote.count({
-          where: { predefinedAnswerId: parseInt(predefinedAnswerId) },
-        }),
+      resolve: ({ id: predefinedAnswerId }, _args, { knex }) => knex("votes")
+	  .count("id", {as: "votesCount"})
+	  .where("predefinedAnswerId", predefinedAnswerId)
+	  .first()
+	  .then(res => res ? res["votesCount"] : 0),
     });
   },
 });
@@ -63,12 +52,19 @@ const PredefinedAnswersMutation = extendType({
         questionId: arg({ type: nonNull("ID"), description: "Question id" }),
         label: arg({ type: nonNull("String"), description: "Answer label" }),
       },
-      resolve: (_parent, { label, questionId }, { prisma }) =>
-        prisma.predefinedAnswer
-          .create({
-            data: { questionId, label },
-          })
-          .then((pa) => ({ ...pa, id: pa.id.toString() })),
+      resolve: (_parent, { label, questionId }, { knex }) =>
+	knex("predefinedAnswers")
+	    .insert({label, questionId})
+	    .returning("id")
+	    .then(id => knex("predefinedAnswers").where("id", id).first())
+	    .then(pa => {
+		if(!pa) { throw new Error("Unable to fetch new created answer")}
+		return pa
+	    })
+	    .then(pa => ({
+		...pa,
+		id: pa.id.toString()
+	    }))
     });
   },
 });
